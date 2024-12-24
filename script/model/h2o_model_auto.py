@@ -4,7 +4,7 @@ from h2o.automl import H2OAutoML
 class H2OModelAuto:
 
     def __init__(self):
-        h2o.init()
+        h2o.init(nthreads=-1, gpu=True)
 
     def forecast_h20(self, df_train, df_test, categorical_var, features, target):
         """
@@ -33,7 +33,7 @@ class H2OModelAuto:
         aml = H2OAutoML(
             max_models=20,
             seed=1,
-            exclude_algos=["DeepLearning"],  # Optionally exclude algorithms
+            # exclude_algos=["DeepLearning"],  # Optionally exclude algorithms
             sort_metric="RMSE"  # Metric to sort models
         )
 

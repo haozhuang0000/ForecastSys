@@ -1,6 +1,6 @@
 import lightgbm as lgb
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
+from cuml.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -101,7 +101,8 @@ class MLModelPure:
             'reg_lambda': 0.0,
             'random_state': None,
             'n_jobs': -1,
-            'verbose': -1
+            'verbose': -1,
+            'device': 'gpu'
         }
 
         # Create parameters to search
@@ -269,7 +270,8 @@ class MLModelPure:
             'reg_lambda': 0.0,
             'random_state': None,
             'n_jobs': -1,
-            'verbose': -1
+            'verbose': -1,
+            'device': 'gpu'
         }
 
         # Create parameters to search
