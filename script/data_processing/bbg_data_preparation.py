@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 from script.data_variables.variables import Variables
-
+from script.big_data.sparkconnection import SparkConnection
+from script.logger.logger import Log
+import os
 class BBGDataPreparation:
 
     def __init__(self):
@@ -9,19 +11,18 @@ class BBGDataPreparation:
         self.fs_path = '../../data/input/union_ebitda_rev_cashflowfromoper_capex_merged_with_x_vars.csv'
         self.comp_path = '../../data/input/Company Info.xlsx'
 
-        self.x_cols_to_process = Variables.X_SELECTED
-        self.industry_cols = Variables.INDUSTRY
-
-        # (self.df_annual_sorted_after_2000,
-        #  self.industry_mappings,
-        #  self.df_company_info) = self.read_csv()
+        self.x_cols_to_process = Variables().X_SELECTED
+        self.industry_cols = Variables().INDUSTRY
+        sp_conn = SparkConnection()
+        self.spark = sp_conn.get_spark_conn('DataPreparation')
+        self.logger = Log(f"{os.path.basename(__file__)}").getlog()
 
     def read_csv(self):
 
+        self.logger.info('loading x and y data...')
         ################################# FILE 1 #################################
         # Reading the CSV file into a pandas DataFrame
         df = pd.read_csv(self.fs_path)
-
         # Converting the 'FUNDAMENTAL_UPDATE_DT' column to a datetime format (assuming dates are in YYYYMMDD format)
         df['FUNDAMENTAL_UPDATE_DT'] = pd.to_datetime(df['FUNDAMENTAL_UPDATE_DT'], format='%Y%m%d')
 
@@ -40,6 +41,7 @@ class BBGDataPreparation:
         # Resetting the index of the sorted DataFrame
         df_annual_sorted_after_2000 = df_annual_after_2000.sort_values(by=['TICKER', 'Year']).reset_index(drop=True)
 
+        self.logger.info('loading industry data...')
         ################################# FILE 2 #################################
         # Reading the Excel file containing industry code mappings into a DataFrame
         # Assuming the sheet 'industry code mapping' contains the relevant mappings
@@ -70,7 +72,7 @@ class BBGDataPreparation:
             industry_level5_mapping,
             industry_level6_mapping
         ]
-
+        self.logger.info('loading company data...')
         ################################# FILE 3 #################################
         # Reading the 'company info' sheet from the Excel file into a DataFrame
         df_company_info = pd.read_excel(self.comp_path, sheet_name='company info')
@@ -85,7 +87,7 @@ class BBGDataPreparation:
                           df_annual_sorted_after_2000,
                           industry_mappings,
                           df_company_info):
-
+        self.logger.info('XY and Industry -> merged data')
         industry_cols_to_merge = []  # List to store names of the new mapped columns
 
         # Iterate over each column and its corresponding mapping
@@ -112,6 +114,7 @@ class BBGDataPreparation:
 
 if __name__ == '__main__':
     dataprocessing = BBGDataPreparation()
-    df_merged = dataprocessing.merge_fs_compinfo()
+    (df_annual_sorted_after_2000, industry_mappings, df_company_info) = dataprocessing.read_csv()
+    df_merged = dataprocessing.merge_fs_compinfo(df_annual_sorted_after_2000, industry_mappings, df_company_info)
     print(df_merged)
     # Specifying the list of columns (variables) related to financial metrics and indicators for further processing

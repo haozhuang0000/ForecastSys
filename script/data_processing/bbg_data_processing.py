@@ -1,24 +1,36 @@
+import pandas as pd
+import numpy as np
+import os
+from tqdm import tqdm
 from script.data_processing.bbg_data_preparation import BBGDataPreparation
 from script.data_processing.bbg_data_aggregation import BBGDataAggregation
 from script.data_processing.bbg_data_missingValueHandler import BBGDataMissingValueHandler
-import pandas as pd
-import numpy as np
+from script.logger.logger import Log
 
 class BBGDataProcessing:
     def __init__(self):
+        directory_path = "../../data/output"
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+
         self.bbgdataprep = BBGDataPreparation()
         self.bbgdataagg = BBGDataAggregation()
         self.bbgdatamvhandler = BBGDataMissingValueHandler()
+        self.logger = Log(f"{os.path.basename(__file__)}").getlog()
 
     def prepare_train_data(self, df_combined):
 
+        self.logger.info('preparing training and test data - missing value handling')
         train_df_list = []
         ground_truth_list = []
 
         # Assuming cols_to_process is defined and contains the columns to be set to np.nan
         # cols_to_process = ['col1', 'col2', ...]
-
-        for ticker, sub_df in df_combined.groupby('TICKER'):
+        self.logger.info('1. replaces columns where more than threshold of values are missing with 0 '
+                         '2. imputes missing values in a pandas Series according to the specified rules '
+                         '3. Combine processed training data with modified test data')
+        for ticker, sub_df in tqdm(df_combined.groupby('TICKER'),
+                                   desc="Processing 1. replace 2. impute 3. combine"):
             # Calculate the number of rows to include (first 80%)
             n_rows = len(sub_df)
             n_train = int(n_rows * 0.8)
@@ -48,7 +60,8 @@ class BBGDataProcessing:
             print("-" * 30)
         return train_df_list, ground_truth_list
 
-    def saving_train_data(self, train_df_list,ground_truth_list):
+    def saving_train_data(self, train_df_list, ground_truth_list):
+
         df_combined_imputed = pd.concat(train_df_list, ignore_index=True)
         df_combined_imputed.to_csv('../../data/output/union_processed_imputed_80_20.csv', index=False)
 

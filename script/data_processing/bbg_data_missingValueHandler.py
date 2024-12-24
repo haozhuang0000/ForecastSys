@@ -1,10 +1,13 @@
 import pandas as pd
+pd.options.mode.chained_assignment = None
 import numpy as np
+import os
 from sklearn.linear_model import LinearRegression
-
+from script.logger.logger import Log
 class BBGDataMissingValueHandler:
 
     def __init__(self):
+        self.logger = Log(f"{os.path.basename(__file__)}").getlog()
         pass
 
     def mark_high_missing_columns(self, df, threshold=0.8):
@@ -91,6 +94,10 @@ class BBGDataMissingValueHandler:
         """
         Handles consecutive missing values between two data points using interpolation.
         """
+        if series.dtype not in [float, int, 'int64']:
+            # print(f"skipping - {series.name} - dtype: {series.dtype}")
+            return series
+        series = pd.to_numeric(series)
         series.interpolate(method='linear', inplace=True)
         return series
 

@@ -1,11 +1,15 @@
 import pandas as pd
 import numpy as np
+import os
+from tqdm import tqdm
 from script.data_variables.bbg_fields import BBGFields
 from script.data_processing.bbg_data_preparation import BBGDataPreparation
+from script.logger.logger import Log
 
 class BBGDataAggregation:
     def __init__(self):
         self.bbgdataprep = BBGDataPreparation()
+        self.logger = Log(f"{os.path.basename(__file__)}").getlog()
 
     def custom_agg(self, x, update_dt_col, eqy_consolidated_col, filing_status_col, accounting_standard_col):
         """
@@ -31,10 +35,10 @@ class BBGDataAggregation:
         """
 
         # Define the priority mapping for 'FILING_STATUS'
-        filing_status_priority = BBGFields.filing_status_priority
+        filing_status_priority = BBGFields().FILING_STATUS_PRIORITY
 
         # Define the priority mapping for 'ACCOUNTING_STANDARD'
-        accounting_standard_priority = BBGFields.accounting_standard_priority
+        accounting_standard_priority = BBGFields().ACCOUNTING_STANDARD_PRIORITY
 
         x = x.dropna()
         if x.empty:
@@ -119,15 +123,13 @@ class BBGDataAggregation:
     def union_processing(self, df_merged, industry_cols_to_merge):
         # Initialize an empty list to store the result DataFrames for each TICKER
         result = []
-
+        self.logger.info('applying BBGDataAggregation.custom_agg to keep only one unique value per company per date'
+                         '(update_date, consolidated, filing_status, accounting_standard)')
         # Combine columns to process from x_cols_to_process and industry_cols_to_merge
         cols_to_process = self.bbgdataprep.x_cols_to_process + industry_cols_to_merge
 
         # Group the merged DataFrame by 'TICKER' and process each group
-        for ticker, sub_df in df_merged.groupby('TICKER'):
-            # Print the current TICKER for tracking/debugging purposes
-            print(f"TICKER: {ticker}")
-
+        for ticker, sub_df in tqdm(df_merged.groupby('TICKER'), desc="Processing TICKER groups - bbg_data_aggregation.py - [union_processing]"):
             # Process each group of rows for the current TICKER, grouped further by 'Year'
             df_result = sub_df.groupby('Year').apply(
                 lambda year: pd.Series(

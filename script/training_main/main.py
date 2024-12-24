@@ -160,6 +160,21 @@ class TrainingMain:
 
             self.plot_result.plot_result(y, models, result)
 
+    def save_results_to_json(self, output_dir="results"):
+        """
+        Save all result maps as JSON files in the specified directory.
+        """
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Save each result map to a JSON file
+        for attr_name in dir(self):
+            if attr_name.startswith("result_") and isinstance(getattr(self, attr_name), dict):
+                file_path = os.path.join(output_dir, f"{attr_name}.json")
+                with open(file_path, "w") as json_file:
+                    json.dump(getattr(self, attr_name), json_file, indent=4)
+                print(f"Saved {attr_name} to {file_path}")
+
     def main(self):
 
         ### --------------------------- Loading training and test data ------------------------ ###
@@ -169,8 +184,8 @@ class TrainingMain:
         df_x_arima_one, df_industry_arima_test = self.helper._prepare_industry_arima(df_x, df_test, nan_rows, self.forecast_auto_arima)
 
         ### --------------------------- run univariate ts model ------------------------ ###
-        # self._run_ts_univariate_pipeline(df, df_ground_truth, self.forecast_ar, self.result_ar1_map)
-        # self._run_ts_univariate_pipeline(df, df_ground_truth, self.forecast_auto_arima, self.result_arima_map)
+        self._run_ts_univariate_pipeline(df, df_ground_truth, self.forecast_ar, self.result_ar1_map)
+        self._run_ts_univariate_pipeline(df, df_ground_truth, self.forecast_auto_arima, self.result_arima_map)
 
         ### --------------------------- run multi-variate ts model ------------------------ ###
 
@@ -220,11 +235,9 @@ class TrainingMain:
 
         # RF ARIMA with industry
         self._run_ml_industry_pipeline(df_industry_train, df_industry_arima_test, df_ground_truth, self.rf_regression_wcat, self.result_rf_industry_arima_map)
-        print(df)
 
-
-
-
+        self._run_plot_result()
+        self.save_results_to_json("../../data/results")
 
 
 if __name__ == "__main__":
