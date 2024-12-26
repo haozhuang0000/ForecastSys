@@ -3,7 +3,8 @@ pd.options.mode.chained_assignment = None
 import numpy as np
 import os
 from sklearn.linear_model import LinearRegression
-from script.logger.logger import Log
+from script.logger import Log
+
 class BBGDataMissingValueHandler:
 
     def __init__(self):

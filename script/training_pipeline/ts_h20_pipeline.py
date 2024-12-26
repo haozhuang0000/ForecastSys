@@ -1,5 +1,5 @@
 import pandas as pd
-
+from tqdm import tqdm
 class TSH20Pipeline:
 
     def __init__(self):
@@ -29,7 +29,8 @@ class TSH20Pipeline:
         result = []
         end_of_series = False
 
-        for y in df[target]:
+        for y in tqdm(df[target], total=len(df),
+                                desc=f"running pipeline: **{self.time_series_h20_forecasting_pipeline.__name__}** - model: **{model.__name__}** - targetcolumn: **{target}**"):
 
             if pd.notna(y):
                 if end_of_series:

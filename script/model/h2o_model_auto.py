@@ -4,7 +4,7 @@ from h2o.automl import H2OAutoML
 class H2OModelAuto:
 
     def __init__(self):
-        h2o.init(nthreads=-1, gpu=True)
+        h2o.init(nthreads=-1)
 
     def forecast_h20(self, df_train, df_test, categorical_var, features, target):
         """

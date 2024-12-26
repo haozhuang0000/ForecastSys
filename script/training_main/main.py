@@ -1,18 +1,21 @@
-from script.training import (TSUnivariatePipeline,
-                             TSMultivariatePipeline,
-                             TSAutoPipeline,
-                             TSMultivariateWLAGPipeline)
-from script.model_eval import Metrics, PlotResult
-from script.data_variables.variables import Variables
-from script.training_helper.training_helper import TrainingHelper
-from script.model.ts_model_pure import TSModelPure
-from script.model.ts_model_auto import TSModelAuto
-from script.model.ml_model_pure import MLModelPure
-from script.model.h2o_model_auto import H2OModelAuto
+from script.training_pipeline import (TSUnivariatePipeline, TSMultivariatePipeline,
+                                      TSAutoPipeline, TSMultivariateWLAGPipeline)
+from script.model_eval import (Metrics,
+                               PlotResult)
+from script.model import (TSModelPure, TSModelAuto,
+                          MLModelPure, H2OModelAuto)
+from script.data_variables import Variables
+from script.training_helper import TrainingHelper
+from script.logger.logger import Log
+import json
 import os
+
 class TrainingMain:
 
     def __init__(self):
+
+        self.logger = Log(f"{os.path.basename(__file__)}").getlog()
+
         # ----------------------- pipelines ----------------------- #
         self.ts_univariate_pipeline = TSUnivariatePipeline()
         self.ts_multivariate_pipeline = TSMultivariatePipeline()
@@ -92,7 +95,7 @@ class TrainingMain:
             df_y = df[y]
             df_x_ar_one_drop = df_x_ar_one.drop(columns=[y])
             result, result_flatten = self.ts_multivariate_pipeline.time_series_multi_forecasting_pipeline(
-                df_x_ar_one_drop, df_y, model
+                df_x_ar_one_drop, df_y, model, y
             )
             metrics = self.metrics.calculate_metrics(result_flatten, df_ground_truth[y])
             result_metrics_map[y] = metrics
@@ -178,66 +181,81 @@ class TrainingMain:
     def main(self):
 
         ### --------------------------- Loading training and test data ------------------------ ###
+        self.logger.info('running data preparation pipeline - loading data')
         df, df_x, df_ground_truth = self.helper.read_data(self.DATA_PATH, self.DATA_PATH_GROUDTRUTH)
         df_industry_train, df_test, nan_rows = self.helper._prepare_train_test(df)
         df_x_ar_one, df_industry_ar_test = self.helper._prepare_industry_ar(df_x, df_test, nan_rows, self.forecast_ar)
-        df_x_arima_one, df_industry_arima_test = self.helper._prepare_industry_arima(df_x, df_test, nan_rows, self.forecast_auto_arima)
+        df_x_arima_one, df_industry_arima_test = self.helper._prepare_industry_arima(df_x, df_test, nan_rows,
+                                                                                     self.forecast_auto_arima)
 
-        ### --------------------------- run univariate ts model ------------------------ ###
+        ### --------------------------- Run univariate ts pipeline ------------------------ ###
+        self.logger.info('running univariate TS pipeline - AR model')
         self._run_ts_univariate_pipeline(df, df_ground_truth, self.forecast_ar, self.result_ar1_map)
+
+        self.logger.info('running univariate TS pipeline - Auto ARIMA model')
         self._run_ts_univariate_pipeline(df, df_ground_truth, self.forecast_auto_arima, self.result_arima_map)
 
-        ### --------------------------- run multi-variate ts model ------------------------ ###
-
-        # RF regression with forecast X:AR(1)
+        ### --------------------------- Run multi-variate ts pipeline ------------------------ ###
+        self.logger.info('running multi-variate TS pipeline - RF regression with X:AR(1)')
         self._run_ts_multivariate_pipeline(df, df_ground_truth, df_x_ar_one, self.rf_regression, self.result_rf_ar1_map)
 
-        # RF regression with forecast X:ARIMA
-        self._run_ts_multivariate_pipeline(df, df_ground_truth, df_x_arima_one, self.rf_regression, self.result_rf_arima_map)
+        self.logger.info('running multi-variate TS pipeline - RF regression with X:ARIMA')
+        self._run_ts_multivariate_pipeline(df, df_ground_truth, df_x_arima_one, self.rf_regression,
+                                           self.result_rf_arima_map)
 
-        # Lightgbm with forecast X:AR(1)
-        self._run_ts_multivariate_pipeline(df, df_ground_truth, df_x_ar_one, self.lightgbm_regression, self.result_lightgbm_ar1_map)
+        self.logger.info('running multi-variate TS pipeline - LightGBM with X:AR(1)')
+        self._run_ts_multivariate_pipeline(df, df_ground_truth, df_x_ar_one, self.lightgbm_regression,
+                                           self.result_lightgbm_ar1_map)
 
-        # Lightgbm with forecast X:ARIMA
-        self._run_ts_multivariate_pipeline(df, df_ground_truth, df_x_arima_one, self.lightgbm_regression, self.result_lightgbm_arima_map)
+        self.logger.info('running multi-variate TS pipeline - LightGBM with X:ARIMA')
+        self._run_ts_multivariate_pipeline(df, df_ground_truth, df_x_arima_one, self.lightgbm_regression,
+                                           self.result_lightgbm_arima_map)
 
-        ### --------------------------- run multi-variate ts model w/ lag ------------------------ ###
-
-        # RF Lag Methodology forecast
+        ### --------------------------- Run multi-variate ts pipeline w/ lag ------------------------ ###
+        self.logger.info('running multi-variate TS with lag pipeline - RF regression')
         self._run_ts_multivariate_wlag_pipeline(df, df_ground_truth, df_x, self.rf_regression, self.result_rf_lag_map)
 
-        # LightGBM Lag Methodology forecast
-        self._run_ts_multivariate_wlag_pipeline(df, df_ground_truth, df_x, self.lightgbm_regression, self.result_lightgbm_lag_map)
+        self.logger.info('running multi-variate TS with lag pipeline - LightGBM')
+        self._run_ts_multivariate_wlag_pipeline(df, df_ground_truth, df_x, self.lightgbm_regression,
+                                                self.result_lightgbm_lag_map)
 
-        ### --------------------------- run auto ts ------------------------ ###
-
-        # Auto Ts
+        ### --------------------------- Run auto ts pipeline ------------------------ ###
+        self.logger.info('running auto TS pipeline - AutoTS model')
         self._run_ts_auto_pipeline(df, df_ground_truth, self.forecast_autots, self.result_auto_ts_map)
 
-        ### --------------------------- run H20 ------------------------ ###
+        ### --------------------------- Run H2O pipeline ------------------------ ###
+        self.logger.info('running H2O pipeline - AR1 with industry model')
+        self._run_h2o_pipeline(df_industry_train, df_industry_ar_test, df_ground_truth,
+                               self.result_h20_industry_ar1_map)
 
-        # H20 AR1 with industry
-        self._run_h2o_pipeline(df_industry_train, df_industry_ar_test, df_ground_truth, self.result_h20_industry_ar1_map)
+        self.logger.info('running H2O pipeline - ARIMA with industry model')
+        self._run_h2o_pipeline(df_industry_train, df_industry_arima_test, df_ground_truth,
+                               self.result_h20_industry_arima_map)
 
-        # H20 ARIMA with industry
-        self._run_h2o_pipeline(df_industry_train, df_industry_arima_test, df_ground_truth, self.result_h20_industry_arima_map)
+        ### --------------------------- Run ML with industry pipeline ------------------------ ###
+        self.logger.info('running ML pipeline - LightGBM AR1 with industry')
+        self._run_ml_industry_pipeline(df_industry_train, df_industry_ar_test, df_ground_truth,
+                                       self.lightgbm_regression_wcat, self.result_lightgbm_industry_ar1_map)
 
-        ### --------------------------- run ml with industry ------------------------ ###
+        self.logger.info('running ML pipeline - LightGBM ARIMA with industry')
+        self._run_ml_industry_pipeline(df_industry_train, df_industry_arima_test, df_ground_truth,
+                                       self.lightgbm_regression_wcat, self.result_lightgbm_industry_arima_map)
 
-        # LightBGM AR1 with industry
-        self._run_ml_industry_pipeline(df_industry_train, df_industry_ar_test, df_ground_truth, self.lightgbm_regression_wcat, self.result_lightgbm_industry_ar1_map)
+        self.logger.info('running ML pipeline - RF AR1 with industry')
+        self._run_ml_industry_pipeline(df_industry_train, df_industry_ar_test, df_ground_truth,
+                                       self.rf_regression_wcat, self.result_rf_industry_ar1_map)
 
-        # LightBGM ARIMA with industry
-        self._run_ml_industry_pipeline(df_industry_train, df_industry_arima_test, df_ground_truth, self.lightgbm_regression_wcat, self.result_lightgbm_industry_arima_map)
+        self.logger.info('running ML pipeline - RF ARIMA with industry')
+        self._run_ml_industry_pipeline(df_industry_train, df_industry_arima_test, df_ground_truth,
+                                       self.rf_regression_wcat, self.result_rf_industry_arima_map)
 
-        # RF AR1 with industry
-        self._run_ml_industry_pipeline(df_industry_train, df_industry_ar_test, df_ground_truth, self.rf_regression_wcat, self.result_rf_industry_ar1_map)
-
-        # RF ARIMA with industry
-        self._run_ml_industry_pipeline(df_industry_train, df_industry_arima_test, df_ground_truth, self.rf_regression_wcat, self.result_rf_industry_arima_map)
-
+        ### --------------------------- Plot results and save ------------------------ ###
+        self.logger.info('running result visualization pipeline - plotting results')
         self._run_plot_result()
+
+        self.logger.info('running result saving pipeline - saving results to JSON')
         self.save_results_to_json("../../data/results")
+        self.logger.info('pipeline - all processes completed successfully')
 
 
 if __name__ == "__main__":

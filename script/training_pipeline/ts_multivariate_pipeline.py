@@ -1,10 +1,11 @@
 import pandas as pd
+from tqdm import tqdm
 class TSMultivariatePipeline:
 
     def __init__(self):
         pass
 
-    def time_series_multi_forecasting_pipeline(self, df_train_x, df_train_y, model):
+    def time_series_multi_forecasting_pipeline(self, df_train_x, df_train_y, model, target_column):
         """
         Processes multivariate time series data, segments it into individual series,
         and applies a forecasting model to each series using exogenous variables.
@@ -25,7 +26,8 @@ class TSMultivariatePipeline:
         result = []
         end_of_series = False
 
-        for y in df_train_y:
+        for y in tqdm(df_train_y, total=len(df_train_y),
+                                desc=f"running pipeline: **{self.time_series_multi_forecasting_pipeline.__name__}** - model: **{model.__name__}** - targetcolumn: **{target_column}**"):
 
             if pd.notna(y):
                 if end_of_series:

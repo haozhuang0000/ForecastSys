@@ -17,13 +17,13 @@ class TSModelPure:
         Returns:
         - list: A list containing the forecasted values.
         """
-        # Convert the list of training points to a numpy array
+        # Convert the list of training_pipeline points to a numpy array
         training_points = np.array(training_points)
 
         # Fit the AR(1) model using statsmodels
         ar_model = sm.tsa.AutoReg(training_points, lags=self.lag).fit()
 
-        # Get the initial training series for forecasting
+        # Get the initial training_pipeline series for forecasting
         start_point = len(training_points)
         end_point = start_point + forecast_points - 1
 
@@ -38,7 +38,7 @@ class TSModelPure:
         Forecast future values using a multivariate AR(1) model with exogenous variables.
 
         Parameters:
-        - y_train (array-like): The endogenous variable (dependent variable) time series data used for training.
+        - y_train (array-like): The endogenous variable (dependent variable) time series data used for training_pipeline.
         - X_train (array-like): The exogenous variables (independent variables) corresponding to y_train.
         - forecast_points (int): The number of future data points to forecast.
         - X_test (array-like): The exogenous variables for the forecast period.

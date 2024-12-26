@@ -16,8 +16,8 @@ class MLModelPure:
         Perform regression using a Random Forest model and forecast future values.
 
         Parameters:
-        - y_train (array-like): The target variable values for training.
-        - X_train (array-like): The feature variables for training.
+        - y_train (array-like): The target variable values for training_pipeline.
+        - X_train (array-like): The feature variables for training_pipeline.
         - forecast_points (int): Not used in this function but kept for consistency.
         - X_test (array-like): The feature variables for which predictions are to be made.
 
@@ -54,7 +54,7 @@ class MLModelPure:
                 random_state=42,
                 scoring='neg_root_mean_squared_error',
             )
-            # Fit the model using grid search on training data
+            # Fit the model using grid search on training_pipeline data
             grid_search.fit(X_train, y_train)
 
             # Get the best parameters from grid search
@@ -78,8 +78,8 @@ class MLModelPure:
         Perform regression using a LightGBM model and forecast future values.
 
         Parameters:
-        - y_train (array-like): The target variable values for training.
-        - X_train (array-like): The feature variables for training.
+        - y_train (array-like): The target variable values for training_pipeline.
+        - X_train (array-like): The feature variables for training_pipeline.
         - forecast_points (int): Not used in this function but kept for consistency.
         - X_test (array-like): The feature variables for which predictions are to be made.
 
@@ -131,7 +131,7 @@ class MLModelPure:
                 random_state=42,
                 scoring='neg_root_mean_squared_error',
             )
-            # Fit the model using grid search on training data
+            # Fit the model using grid search on training_pipeline data
             grid.fit(X_train, y_train)
 
             # Use the best estimator from grid search
@@ -152,8 +152,8 @@ class MLModelPure:
         handling categorical variables via encoding.
 
         Parameters:
-        - y_train (array-like): The target variable values for training.
-        - X_train (DataFrame): The feature variables for training.
+        - y_train (array-like): The target variable values for training_pipeline.
+        - X_train (DataFrame): The feature variables for training_pipeline.
         - forecast_points (int): Not used in this function but kept for consistency.
         - X_test (DataFrame): The feature variables for which predictions are to be made.
         - categorical_features (list, optional): List of column names of categorical features.
@@ -221,7 +221,7 @@ class MLModelPure:
                 random_state=42,
                 scoring='neg_root_mean_squared_error',
             )
-            # Fit the model using grid search on training data
+            # Fit the model using grid search on training_pipeline data
             grid_search.fit(X_train, y_train)
 
             # Get the best parameters from grid search
@@ -245,8 +245,8 @@ class MLModelPure:
         Perform regression using a LightGBM model and forecast future values.
 
         Parameters:
-        - y_train (array-like): The target variable values for training.
-        - X_train (DataFrame): The feature variables for training.
+        - y_train (array-like): The target variable values for training_pipeline.
+        - X_train (DataFrame): The feature variables for training_pipeline.
         - forecast_points (int): Not used in this function but kept for consistency.
         - X_test (DataFrame): The feature variables for which predictions are to be made.
         - categorical_features (list, optional): List of column names of categorical features.
@@ -313,7 +313,7 @@ class MLModelPure:
                 scoring='neg_root_mean_squared_error',
             )
 
-            # Fit the model using grid search on training data
+            # Fit the model using grid search on training_pipeline data
             grid.fit(X_train, y_train, categorical_feature=categorical_features)
 
             # Use the best estimator from grid search

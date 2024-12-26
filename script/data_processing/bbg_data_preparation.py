@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 from script.data_variables.variables import Variables
 from script.big_data.sparkconnection import SparkConnection
-from script.logger.logger import Log
+from script.logger import Log
 import os
+
 class BBGDataPreparation:
 
     def __init__(self):

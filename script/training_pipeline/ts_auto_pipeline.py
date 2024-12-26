@@ -1,4 +1,5 @@
 import pandas as pd
+from tqdm import tqdm
 
 class TSAutoPipeline:
 
@@ -26,7 +27,8 @@ class TSAutoPipeline:
         result = []
         end_of_series = False
 
-        for index, row in df.iterrows():
+        for index, row in tqdm(df.iterrows(), total=len(df),
+                                desc=f"running pipeline: **{self.time_series_AutoTS_forecasting_pipeline.__name__}** - model: **{model.__name__}** - targetcolumn: **{target_var}**"):
 
             if pd.notna(row[target_var]):
                 if end_of_series:

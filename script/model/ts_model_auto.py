@@ -43,7 +43,7 @@ class TSModelAuto:
             if len(training_points) > 0:
                 last_value = training_points[-1]
             else:
-                last_value = 0  # Default to zero if training data is empty
+                last_value = 0  # Default to zero if training_pipeline data is empty
 
             forecast = [last_value] * forecast_points
             return forecast

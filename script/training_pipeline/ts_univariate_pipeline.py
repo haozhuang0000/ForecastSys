@@ -1,4 +1,5 @@
 import pandas as pd
+from tqdm import tqdm
 
 class TSUnivariatePipeline:
 
@@ -14,19 +15,20 @@ class TSUnivariatePipeline:
         Parameters:
         - df (DataFrame): The input DataFrame containing the time series data.
         - target_column (str): The name of the target column in the DataFrame to forecast.
-        - model (function): A forecasting function that takes in training data and the number of points to forecast.
+        - model (function): A forecasting function that takes in training_pipeline data and the number of points to forecast.
 
         Returns:
         - result (list): A list of forecasted values for each series.
         - result_flatten (list): A flattened list of all forecasted values.
-        - training_data_with_forecast_result (list): A combined list of training data and forecasted values for all series.
+        - training_data_with_forecast_result (list): A combined list of training_pipeline data and forecasted values for all series.
         """
         training_data = []
         forecasting_point = 0
         result = []
         training_data_with_forecast_result = []
         end_of_series = False
-        for index, row in df.iterrows():
+        for index, row in tqdm(df.iterrows(), total=len(df),
+                                desc=f"running pipeline: **{self.time_series_forecasting_pipeline.__name__}** - model: **{model.__name__}** - targetcolumn: **{target_column}**"):
             if pd.notna(row[target_column]):
                 if end_of_series and len(training_data) > 3:
                     forecast_values = model(training_data, forecasting_point)

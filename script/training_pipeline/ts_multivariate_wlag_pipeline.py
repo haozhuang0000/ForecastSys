@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 class TSMultivariateWLAGPipeline:
 
@@ -33,12 +34,12 @@ class TSMultivariateWLAGPipeline:
     @staticmethod
     def forecast_df_with_lag(df, forecasting_point, lag, model, x_cols_to_forecast, target_col):
         """
-        Prepares training and testing datasets with a specified lag and applies a forecasting model.
+        Prepares training_pipeline and testing datasets with a specified lag and applies a forecasting model.
 
         Parameters:
         - df (DataFrame): The input DataFrame containing the features and target variable.
         - forecasting_point (int): The number of future data points to forecast.
-        - lag (int): The lag value to shift the target variable for training.
+        - lag (int): The lag value to shift the target variable for training_pipeline.
         - model (function): A forecasting function that takes in y_train, X_train, forecast_points, and X_test.
         - x_cols_to_forecast (list): A list of column names to be used as features.
         - target_col (str): The name of the target variable column in the DataFrame.
@@ -81,7 +82,8 @@ class TSMultivariateWLAGPipeline:
         result = []
         end_of_series = False
 
-        for y in df_train_y:
+        for y in tqdm(df_train_y, total=len(df_train_y),
+                                desc=f"running pipeline: **{self.time_series_multi_with_lag_forecasting_pipeline.__name__}** - model: **{model.__name__}** - targetcolumn: **{target_col}**"):
 
             if pd.notna(y):
                 if end_of_series:

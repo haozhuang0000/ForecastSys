@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from script.training.ts_univariate_pipeline import TSUnivariatePipeline
+from script.training_pipeline.ts_univariate_pipeline import TSUnivariatePipeline
 from script.data_variables.variables import Variables
 
 class TrainingHelper:
@@ -39,7 +39,7 @@ class TrainingHelper:
 
         Returns:
         - df_forecast_x (DataFrame): A DataFrame containing the forecasted values for each specified column,
-          combined with the original training data.
+          combined with the original training_pipeline data.
         """
         forecast_results = {}
 

@@ -4,7 +4,7 @@ import os
 from tqdm import tqdm
 from script.data_variables.bbg_fields import BBGFields
 from script.data_processing.bbg_data_preparation import BBGDataPreparation
-from script.logger.logger import Log
+from script.logger import Log
 
 class BBGDataAggregation:
     def __init__(self):

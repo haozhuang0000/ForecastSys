@@ -20,7 +20,7 @@ class BBGDataProcessing:
 
     def prepare_train_data(self, df_combined):
 
-        self.logger.info('preparing training and test data - missing value handling')
+        self.logger.info('preparing training_pipeline and test data - missing value handling')
         train_df_list = []
         ground_truth_list = []
 
@@ -28,14 +28,14 @@ class BBGDataProcessing:
         # cols_to_process = ['col1', 'col2', ...]
         self.logger.info('1. replaces columns where more than threshold of values are missing with 0 '
                          '2. imputes missing values in a pandas Series according to the specified rules '
-                         '3. Combine processed training data with modified test data')
+                         '3. Combine processed training_pipeline data with modified test data')
         for ticker, sub_df in tqdm(df_combined.groupby('TICKER'),
                                    desc="Processing 1. replace 2. impute 3. combine"):
             # Calculate the number of rows to include (first 80%)
             n_rows = len(sub_df)
             n_train = int(n_rows * 0.8)
 
-            # Split the data into training and testing subsets
+            # Split the data into training_pipeline and testing subsets
             train_sub_df = sub_df.iloc[:n_train]
             test_sub_df = sub_df.iloc[n_train:]
 
@@ -51,7 +51,7 @@ class BBGDataProcessing:
             # Step 2: Handle missing values for each ticker
             df_processed = self.bbgdatamvhandler.impute_missing_values(df)
 
-            # Combine processed training data with modified test data
+            # Combine processed training_pipeline data with modified test data
             df_train = pd.concat([df_processed, test_sub_df], ignore_index=True)
 
             # Add the combined data to the train list
