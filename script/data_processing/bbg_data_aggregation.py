@@ -121,15 +121,15 @@ class BBGDataAggregation:
 
 
     def union_processing(self, df_merged, industry_cols_to_merge):
-        # Initialize an empty list to store the result DataFrames for each TICKER
+        # Initialize an empty list to store the result DataFrames for each ID_BB_UNIQUE
         result = []
         self.logger.info('applying BBGDataAggregation.custom_agg to keep only one unique value per company per date'
                          '(update_date, consolidated, filing_status, accounting_standard)')
         # Combine columns to process from x_cols_to_process and industry_cols_to_merge
         cols_to_process = self.bbgdataprep.x_cols_to_process + industry_cols_to_merge
 
-        # Group the merged DataFrame by 'TICKER' and process each group
-        for ticker, sub_df in tqdm(df_merged.groupby('TICKER'), desc="Processing TICKER groups - bbg_data_aggregation.py - [union_processing]"):
+        # Group the merged DataFrame by 'ID_BB_UNIQUE' and process each group
+        for id_bb_unique, sub_df in tqdm(df_merged.groupby('ID_BB_UNIQUE'), desc="Processing ID_BB_UNIQUE groups - bbg_data_aggregation.py - [union_processing]"):
             # Process each group of rows for the current TICKER, grouped further by 'Year'
             df_result = sub_df.groupby('Year').apply(
                 lambda year: pd.Series(
@@ -150,10 +150,10 @@ class BBGDataAggregation:
                 )
             ).reset_index(drop=True)  # Flatten the result by resetting the index
 
-            # Insert the 'TICKER' column to associate the processed data with the corresponding ticker
-            df_result.insert(1, 'TICKER', list(sub_df['TICKER'])[0])  # Use the first TICKER value in the sub-group
+            # Insert the 'ID_BB_UNIQUE' column to associate the processed data with the corresponding id_bb_unique
+            df_result.insert(1, 'ID_BB_UNIQUE', list(sub_df['ID_BB_UNIQUE'])[0])  # Use the first ID_BB_UNIQUE value in the sub-group
 
-            # Append the processed DataFrame for this TICKER to the result list
+            # Append the processed DataFrame for this ID_BB_UNIQUE to the result list
             result.append(df_result)
 
         df_combined = pd.concat(result, ignore_index=True)

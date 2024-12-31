@@ -99,14 +99,14 @@ class BBGDataPreparation:
             # Create the new column by mapping values using the provided dictionary
             df_company_info[new_col_name] = df_company_info[col].map(mapping)
 
-        # Combine the industry mapped columns and the 'TICKER' column into a list
-        columns_to_select = industry_cols_to_merge + ['TICKER']
+        # Combine the industry mapped columns and the 'ID_BB_UNIQUE' column into a list
+        columns_to_select = industry_cols_to_merge + ['ID_BB_UNIQUE']
 
-        # Perform a left join to merge the two DataFrames on the 'TICKER' column
+        # Perform a left join to merge the two DataFrames on the 'ID_BB_UNIQUE' column
         df_merged = pd.merge(
             df_annual_sorted_after_2000,
             df_company_info[columns_to_select],
-            on='TICKER',
+            on='ID_BB_UNIQUE',
             how='left'
         )
 

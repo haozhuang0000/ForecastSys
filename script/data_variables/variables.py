@@ -23,7 +23,7 @@ class Variables:
             'INDUSTRY_SECTOR_NUM', 'INDUSTRY_GROUP_NUM', 'INDUSTRY_SUBGROUP_NUM',
             'Industry_level_4_num', 'Industry_level_5_num', 'Industry_level_6_num'
         ]
-        self._INDUSTRY_TIC_INFO = ['TICKER'] + [i + '_mapped' for i in self._INDUSTRY]
+        self._INDUSTRY_TIC_INFO = ['ID_BB_UNIQUE'] + [i + '_mapped' for i in self._INDUSTRY] + ['TICKER']
 
     @property
     def X_SELECTED(self):

@@ -55,7 +55,7 @@ class TrainingHelper:
 
     def _prepare_industry_ar(self, df_x, df_test, nan_rows, model):
 
-        file_path = '../../data/output/df_x_ar1.csv'
+        file_path = '../../data/df_x_ar1.csv'
         if not os.path.exists(file_path):
             df_x_ar_one = self.forecast_x_col(df_x, self.x_cols_to_forecast, model)
             df_x_ar_one.to_csv(file_path, index=False)
@@ -70,7 +70,7 @@ class TrainingHelper:
 
     def _prepare_industry_arima(self, df_x, df_test, nan_rows, model):
 
-        file_path = '../../data/output/df_x_arima.csv'
+        file_path = '../../data/df_x_arima.csv'
         if not os.path.exists(file_path):
             df_x_arima = self.forecast_x_col(df_x, self.x_cols_to_forecast, model)
             df_x_arima.to_csv(file_path, index=False)
